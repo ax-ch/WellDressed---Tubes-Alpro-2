@@ -8,8 +8,8 @@ type ClothingItem struct {
 	Color     string
 	Category  string
 	Formality int
-	LastWorn  string // e.g., "2024-05-01"
-	Weather   string // e.g., "Rainy", "Hot"
+	LastWorn  string
+	Weather   string
 }
 
 type wardrobe []ClothingItem
