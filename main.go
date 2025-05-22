@@ -16,70 +16,76 @@ type wardrobe []ClothingItem
 
 func main() {
 	var item wardrobe
-	var choice int
+	var total int
 
-	menu()
-	fmt.Scan(&choice)
-	switch choice {
-	case 1:
-		editWardrobe()
-	case 2:
-		sortingMenu(item)
-	case 3:
-		searchClothingItem()
-	case 4:
-		recommendOutfit()
-	case 5:
-		fmt.Println("Exiting WellDressed ...")
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		menu()
+	welcome()
+	readNumberOfClothingItems(&total)
+	addClothingItem(&item, total)
+	viewAllClothingItems(item)
+	fmt.Println("Wardrobe setup complete!")
+	fmt.Println("You can now edit, sort, search, and get outfit recommendations.")
+	fmt.Println()
+
+	menuChoice(&item, &total)
+	fmt.Println("Thank you for using WellDressed! Goodbye!")
+	fmt.Println("=========================================================================")
+}
+
+func welcome() {
+	var userName string
+
+	fmt.Print("Enter your name: ")
+	fmt.Scan(&userName)
+	fmt.Println("=========================================================================")
+	fmt.Println(" /\\_/\\  Hello %s, welcome to WellDressed!", userName)
+	fmt.Println("( o.o )  This is your digital wardrobe.")
+	fmt.Println(" > ^ <  You can add, modify, remove, and sort your clothing items.")
+	fmt.Println("You can also search for clothing items and get outfit recommendations.")
+	fmt.Println("Let's get started!")
+	fmt.Println("=========================================================================")
+	fmt.Println()
+}
+
+func readNumberOfClothingItems(total *int) {
+	fmt.Println("First, let's set up your wardrobe.")
+	fmt.Print("Enter the number of clothing items in your wardrobe: ")
+	fmt.Scan(&total)
+
+	if *total < 1 {
+		fmt.Println("Invalid number of clothing items. Please enter a positive integer.")
+		readNumberOfClothingItems(total)
 	}
 }
 
-func menu() {
-	fmt.Println("=======WellDressed: Digital Wardrobe=======")
-	fmt.Println("1. Edit My Wardrobe")
-	fmt.Println("2. Sort My Wardrobe")
-	fmt.Println("3. Search Clothing Item")
-	fmt.Println("4. Reccommend Me an Outfit!")
-	fmt.Println("5. Exit")
-	fmt.Println("===========================================")
-	fmt.Print("Choose an option (1-5): ")
-}
+func addClothingItem(item *wardrobe, total int) {
+	var NextID int = 1
 
-func editWardrobe() {
-	var item wardrobe
-	var choice int
+	for i := 0; i < total; i++ {
+		(*item)[i].ID = NextID
 
-	fmt.Println("=======Edit My Wardrobe=======")
-	fmt.Println("1. Add Clothing Item")
-	fmt.Println("2. Modify Clothing Item")
-	fmt.Println("3. Remove Clothing Item")
-	fmt.Println("4. View All Clothing Items")
-	fmt.Println("5. Back to Main Menu")
-	fmt.Println("===============================")
-	fmt.Print("Choose an option (1-5): ")
+		fmt.Println("Choose clothing category:")
+		chooseCategory(item, i)
 
-	fmt.Scan(&choice)
-	switch choice {
-	case 1:
-		addClothingItem(&item)
-	case 2:
-		modifyClothingItem(&item)
-	case 3:
-		removeClothingItem(&item)
-	case 4:
-		viewAllClothingItems(item) // not made
-	case 5:
-		menu()
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		editWardrobe()
+		fmt.Print("Enter clothing name: ")
+		enterClothingName(item, i)
+
+		fmt.Print("Enter clothing color (one word, e.g., blue, red): ")
+		enterClothingColor(item, i)
+
+		fmt.Println("Choose the suitable weather category")
+		chooseWeather(item, i)
+
+		fmt.Print("Enter clothing formality (1-10): ")
+		enterClothingFormality(item, i)
+
+		fmt.Print("Enter last worn date (YYYY-MM-DD): ")
+		enterClothingLastWorn(item, i)
+
+		NextID++
 	}
 }
 
-func menuCategory(item *wardrobe, index int) {
+func chooseCategory(item *wardrobe, index int) {
 	var categoryChoice int
 
 	fmt.Println("1. Top")
@@ -87,8 +93,7 @@ func menuCategory(item *wardrobe, index int) {
 	fmt.Println("3. Dress")
 	fmt.Println("4. Shoes")
 	fmt.Println("5. Accessories")
-	fmt.Println("6. Others")
-	fmt.Print("Enter your choice (1-6): ")
+	fmt.Print("Enter your choice (1-5): ")
 
 	fmt.Scan(&categoryChoice)
 	switch categoryChoice {
@@ -102,15 +107,39 @@ func menuCategory(item *wardrobe, index int) {
 		(*item)[index].Category = "Shoes"
 	case 5:
 		(*item)[index].Category = "Accessories"
-	case 6:
-		(*item)[index].Category = "Others"
 	default:
 		fmt.Println("Invalid choice, please try again.")
-		menuCategory(item, index)
+		chooseCategory(item, index)
 	}
 }
 
-func menuWeather(item *wardrobe, index int) {
+func enterClothingName(item *wardrobe, index int) {
+	var name string
+
+	fmt.Scan(&name)
+
+	if len(name) < 1 && name == " " {
+		fmt.Println("Invalid name, please try again.")
+		enterClothingName(item, index)
+	} else {
+		(*item)[index].Name = name
+	}
+}
+
+func enterClothingColor(item *wardrobe, index int) {
+	var color string
+
+	fmt.Scan(&color)
+
+	if len(color) < 1 && color == " " {
+		fmt.Println("Invalid color, please try again.")
+		enterClothingColor(item, index)
+	} else {
+		(*item)[index].Color = color
+	}
+}
+
+func chooseWeather(item *wardrobe, index int) {
 	var weatherChoice int
 
 	fmt.Println("1. Hot")
@@ -128,108 +157,33 @@ func menuWeather(item *wardrobe, index int) {
 		(*item)[index].Weather = "Cold"
 	default:
 		fmt.Println("Invalid choice, please try again.")
-		menuWeather(item, index)
+		chooseWeather(item, index)
 	}
 }
 
-// belum ada error handling
-func addClothingItem(item *wardrobe) {
-	var total, NextID int
-	NextID = 1
+func enterClothingFormality(item *wardrobe, index int) {
+	var formality int
 
-	fmt.Print("Enter the number of clothing items to add: ")
-	fmt.Scan(&total)
-	for i := 0; i < total; i++ {
-		(*item)[i].ID = NextID
+	fmt.Scan(&formality)
 
-		fmt.Println("Choose clothing category:")
-		menuCategory(item, i)
-
-		fmt.Print("Enter clothing name: ")
-		fmt.Scan(&(*item)[i].Name)
-
-		fmt.Print("Enter clothing color (one word, e.g., blue, red): ")
-		fmt.Scan((*item)[i].Color)
-
-		fmt.Println("Choose the suitable weather category:")
-		menuWeather(item, i)
-
-		fmt.Print("Enter clothing formality (1-10): ")
-		fmt.Scan((*item)[i].Formality)
-
-		fmt.Print("Enter last worn date (YYYY-MM-DD): ")
-		fmt.Scan((*item)[i].LastWorn)
-
-		NextID++
-	}
-	fmt.Println("Clothing item added successfully!")
-	editWardrobe()
-}
-
-func modifyClothingItem(item *wardrobe) {
-	var id int
-	var choice int
-
-	fmt.Print("Enter the ID of the clothing item to modify: ")
-	fmt.Scan(&id)
-
-	for i := 0; i < len(*item); i++ {
-		if (*item)[i].ID == id {
-			fmt.Println("Choose new clothing category:")
-			menuCategory(item, i)
-
-			fmt.Print("Enter new clothing name: ")
-			fmt.Scan(&(*item)[i].Name)
-
-			fmt.Print("Enter new clothing color (one word, e.g., blue, red): ")
-			fmt.Scan(&(*item)[i].Color)
-
-			fmt.Println("Choose the new suitable weather category:")
-			menuWeather(item, i)
-
-			fmt.Print("Enter new clothing formality (1-10): ")
-			fmt.Scan(&(*item)[i].Formality)
-
-			fmt.Print("Enter new last worn date (YYYY-MM-DD): ")
-			fmt.Scan(&(*item)[i].LastWorn)
-
-			fmt.Println("Clothing item modified successfully!")
-			return
-		}
-	}
-	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
-	fmt.Scan(&choice)
-	if choice == 1 {
-		modifyClothingItem(item)
+	if formality < 1 || formality > 10 {
+		fmt.Println("Invalid formality, please try again.")
+		enterClothingFormality(item, index)
 	} else {
-		editWardrobe()
+		(*item)[index].Formality = formality
 	}
 }
 
-func removeClothingItem(item *wardrobe) {
-	var id, count int
-	var choice int
-	count = len(*item)
+func enterClothingLastWorn(item *wardrobe, index int) {
+	var lastWorn string
 
-	fmt.Print("Enter the ID of the clothing item to remove: ")
-	fmt.Scan(&id)
+	fmt.Scan(&lastWorn)
 
-	for i := 0; i < count; i++ {
-		if (*item)[i].ID == id {
-			for j := i; j < count-1; j++ {
-				(*item)[j] = (*item)[j+1]
-			}
-			*item = (*item)[:count-1]
-			fmt.Println("Clothing item removed successfully!")
-			return
-		}
-	}
-	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
-	fmt.Scan(&choice)
-	if choice == 1 {
-		removeClothingItem(item)
+	if len(lastWorn) != 10 {
+		fmt.Println("Invalid date format, please try again.")
+		enterClothingLastWorn(item, index)
 	} else {
-		editWardrobe()
+		(*item)[index].LastWorn = lastWorn
 	}
 }
 
@@ -239,68 +193,199 @@ func viewAllClothingItems(item wardrobe) {
 		fmt.Println("No clothing items found.")
 	} else {
 		fmt.Printf("|| %-10s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s ||\n", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
-		fmt.Println("---------------------------------------------------------------------")
+		fmt.Println("----------------------------------------------------------------------")
 		for i := 0; i < len(item); i++ {
 			fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10d | %-10s | %-10s ||\n",
 				item[i].ID, item[i].Name, item[i].Color, item[i].Category, item[i].Formality, item[i].LastWorn, item[i].Weather)
 		}
 	}
 	fmt.Println("=======================================================================")
-	editWardrobe()
 }
 
-func sortingMenu(item wardrobe) {
+func menu() {
+	fmt.Println("╔═════════════════════════════════════════╗")
+	fmt.Println("║               WellDressed               ║")
+	fmt.Println("║        Digital Wardrobe Assistant       ║")
+	fmt.Println("╠═════════════════════════════════════════╣")
+	fmt.Println("║ 1. Edit My Wardrobe                     ║")
+	fmt.Println("║ 2. Sort My Wardrobe                     ║")
+	fmt.Println("║ 3. Search Clothing Item                 ║")
+	fmt.Println("║ 4. Recommend Me an Outfit!              ║")
+	fmt.Println("║ 5. Exit                                 ║")
+	fmt.Println("╚═════════════════════════════════════════╝")
+}
+
+func menuChoice(item *wardrobe, total *int) {
 	var choice int
 
-	fmt.Println("==============Sort My Wardrobe=============")
+	menu()
+	fmt.Print("Choose an option (1-5): ")
+	fmt.Scan(&choice)
+	switch choice {
+	case 1:
+		editWardrobe(item, total)
+	case 2:
+		sortingMenu(*item, total)
+	case 3:
+		searchClothingItem() // not implemented yet
+	case 4:
+		recommendOutfit() // not implemented yet
+	case 5:
+		fmt.Println("Exiting WellDressed ...")
+	default:
+		fmt.Println("Invalid choice, please try again.")
+		menuChoice(item, total)
+	}
+}
+
+func editWardrobe(item *wardrobe, total *int) {
+	var choice int
+
+	fmt.Println("Edit My Wardrobe")
+	fmt.Println("1. Modify Clothing Item")
+	fmt.Println("2. Remove Clothing Item")
+	fmt.Println("3. Back to Main Menu")
+	fmt.Print("Choose an option (1-3): ")
+
+	fmt.Scan(&choice)
+	switch choice {
+	case 1:
+		modifyClothingItem(item, *total)
+	case 2:
+		removeClothingItem(item, total)
+	case 3:
+		menuChoice(item, total)
+	default:
+		fmt.Println("Invalid choice, please try again.")
+		editWardrobe(item, total)
+	}
+}
+
+func modifyClothingItem(item *wardrobe, total int) {
+	var id int
+	var choice int
+
+	viewAllClothingItems(*item)
+	fmt.Print("Enter the ID of the clothing item to modify: ")
+	fmt.Scan(&id)
+
+	for i := 0; i < len(*item); i++ {
+		if (*item)[i].ID == id {
+			fmt.Println("Choose new clothing category:")
+			chooseCategory(item, i)
+
+			fmt.Print("Enter new clothing name: ")
+			enterClothingName(item, i)
+
+			fmt.Print("Enter new clothing color (one word, e.g., blue, red): ")
+			enterClothingColor(item, i)
+
+			fmt.Println("Choose the new suitable weather category:")
+			chooseWeather(item, i)
+
+			fmt.Print("Enter new clothing formality (1-10): ")
+			enterClothingFormality(item, i)
+
+			fmt.Print("Enter new last worn date (YYYY-MM-DD): ")
+			enterClothingLastWorn(item, i)
+
+			viewAllClothingItems(*item)
+			fmt.Println("Clothing item modified successfully!")
+			editWardrobe(item, &total)
+		}
+	}
+
+	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
+	fmt.Scan(&choice)
+	if choice == 1 {
+		modifyClothingItem(item, total)
+	} else {
+		editWardrobe(item, &total)
+	}
+}
+
+func removeClothingItem(item *wardrobe, total *int) {
+	var id int
+	var choice int
+
+	viewAllClothingItems(*item)
+	fmt.Print("Enter the ID of the clothing item to remove: ")
+	fmt.Scan(&id)
+
+	for i := 0; i < *total; i++ {
+		if (*item)[i].ID == id {
+			for j := i; j < *total-1; j++ {
+				(*item)[j] = (*item)[j+1]
+			}
+			*total--
+
+			fmt.Println("Clothing item removed successfully!")
+			viewAllClothingItems(*item)
+			editWardrobe(item, total)
+		}
+	}
+
+	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
+	fmt.Scan(&choice)
+	if choice == 1 {
+		removeClothingItem(item, total)
+	} else {
+		editWardrobe(item, total)
+	}
+}
+
+func sortingMenu(item wardrobe, total *int) {
+	var choice int
+
+	fmt.Println("Sort My Wardrobe")
 	fmt.Println("1. Sort from Most Formal to Least Formal")
 	fmt.Println("2. Sort from Least Formal to Most Formal")
 	fmt.Println("3. Sort by Last Worn")
-	fmt.Println("4. Back")
-	fmt.Println("===========================================")
+	fmt.Println("4. Back to Main Menu")
 	fmt.Print("Choose an option (1-4): ")
 
 	fmt.Scan(&choice)
 	switch choice {
 	case 1:
-		sortMostFormal(item) // not made
+		sortMostFormal(item)
 	case 2:
-		sortLeastFormal(item) // not made
+		sortLeastFormal(item)
 	case 3:
-		sortByLastWorn(item) // not made
+		sortByLastWorn(item)
 	case 4:
-		menu()
+		menuChoice(&item, total)
 	default:
 		fmt.Println("Invalid choice, please try again.")
-		sortingMenu(item)
+		sortingMenu(item, total)
 	}
 }
 
 func sortMostFormal(item wardrobe) {
-	var arr wardrobe
-	arr = item
-	selectionSortDescendingFormal(arr)
-	printSorted(arr)
+	var sortedItem wardrobe
+	sortedItem = item
+	selectionSortDescendingFormal(sortedItem)
+	printSorted(sortedItem)
 }
 
 func sortLeastFormal(item wardrobe) {
-	var arr wardrobe
-	arr = item
-	selectionSortAscendingFormal(arr)
-	printSorted(arr)
+	var sortedItem wardrobe
+	sortedItem = item
+	selectionSortAscendingFormal(sortedItem)
+	printSorted(sortedItem)
 }
 
 func sortByLastWorn(item wardrobe) {
-	var arr wardrobe
-	arr = item
-	insertionSortByLastWorn(arr)
-	printSorted(arr)
+	var sortedItem wardrobe
+	sortedItem = item
+	insertionSortByLastWorn(sortedItem)
+	printSorted(sortedItem)
 }
 
 func selectionSortDescendingFormal(arr wardrobe) {
 	var i, j int
 	var maxIndex int
 	var temp ClothingItem
+
 	for i = 0; i < len(arr)-1; i++ {
 		maxIndex = i
 		for j = i + 1; j < len(arr); j++ {
