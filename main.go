@@ -10,9 +10,9 @@ type ClothingItem struct {
 	Formality int
 	LastWorn  string
 	Weather   string
-}
+} 
 
-type wardrobe []ClothingItem
+type wardrobe []ClothingItem // add NMAX
 
 func main() {
 	var item wardrobe
@@ -215,7 +215,7 @@ func menu() {
 	fmt.Println("╚═════════════════════════════════════════╝")
 }
 
-func menuChoice(item *wardrobe, total *int) {
+func menuChoice(item *wardrobe, total *int) { // make it a function
 	var choice int
 
 	menu()
