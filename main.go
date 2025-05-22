@@ -12,7 +12,8 @@ type ClothingItem struct {
 	Weather   string
 } 
 
-type wardrobe []ClothingItem // add NMAX
+const NMAX int = 77
+type wardrobe [NMAX]ClothingItem
 
 func main() {
 	var item wardrobe
