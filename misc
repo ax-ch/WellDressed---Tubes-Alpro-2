@@ -3,19 +3,21 @@ package main
 import "fmt"
 
 type ClothingItem struct {
-	ID      int
-	Name    string
-	Color   string
-	Weather string
+	ID    int
+	Name  string
+	Color string
 
 	Category    string
 	numCategory int
 
-	Formality     string
-	rankFormality int
+	Formality  string
+	rFormality int
 
-	LastWorn     string
-	rankLastWorn int
+	Weather    string
+	numWeather int
+
+	LastWorn  string
+	rLastWorn int
 }
 
 const NMAX int = 99
@@ -127,19 +129,26 @@ func chooseClothingCategory(item *wardrobe, index int) {
 	}
 
 	(*item)[index].numCategory = categoryChoice
+	(*item)[index].Category = category(categoryChoice)
+}
 
-	switch categoryChoice {
+func category(n int) string {
+	var result string
+
+	switch n {
 	case 1:
-		(*item)[index].Category = "Top"
+		result = "Tops"
 	case 2:
-		(*item)[index].Category = "Bottoms"
+		result = "Bottoms"
 	case 3:
-		(*item)[index].Category = "Dress"
+		result = "Dress"
 	case 4:
-		(*item)[index].Category = "Shoes"
+		result = "Shoes"
 	case 5:
-		(*item)[index].Category = "Accessories"
+		result = "Accesories"
 	}
+
+	return result
 }
 
 func chooseClothingWeather(item *wardrobe, index int) {
@@ -162,46 +171,62 @@ func chooseClothingWeather(item *wardrobe, index int) {
 		fmt.Scan(&weatherChoice)
 	}
 
-	switch weatherChoice {
+	(*item)[index].numWeather = weatherChoice
+	(*item)[index].Weather = weather(weatherChoice)
+}
+
+func weather(n int) string {
+	var result string
+
+	switch n {
 	case 1:
-		(*item)[index].Weather = "Hot"
+		result = "Hot"
 	case 2:
-		(*item)[index].Weather = "Temperate"
+		result = "Temperate"
 	case 3:
-		(*item)[index].Weather = "Cold"
+		result = "Cold"
 	}
+
+	return result
 }
 
 func chooseClothingFormality(item *wardrobe, index int) {
-	var formality int
+	var formalityChoice int
 
 	fmt.Println("Choose clothing formality")
 	fmt.Println("1. Casual")
 	fmt.Println("2. Semi-Formal")
 	fmt.Println("3. Formal")
 	fmt.Print("Enter your choice (1-3): ")
-	fmt.Scan(&formality)
+	fmt.Scan(&formalityChoice)
 
-	for formality < 1 || formality > 3 {
+	for formalityChoice < 1 || formalityChoice > 3 {
 		fmt.Println("Invalid formality, please try again.")
 		fmt.Println("Choose clothing formality")
 		fmt.Println("1. Casual")
 		fmt.Println("2. Semi-Formal")
 		fmt.Println("3. Formal")
 		fmt.Print("Enter your choice (1-3): ")
-		fmt.Scan(&formality)
+		fmt.Scan(&formalityChoice)
 	}
 
-	(*item)[index].rankFormality = formality
+	(*item)[index].rFormality = formalityChoice
+	(*item)[index].Formality = formality(formalityChoice)
+}
 
-	switch formality {
+func formality(n int) string {
+	var result string
+
+	switch n {
 	case 1:
-		(*item)[index].Formality = "Casual"
+		result = "Casual"
 	case 2:
-		(*item)[index].Formality = "Semi-Formal"
+		result = "Semi-Formal"
 	case 3:
-		(*item)[index].Formality = "Formal"
+		result = "Formal"
 	}
+
+	return result
 }
 
 func enterClothingColor(item *wardrobe, index int) {
@@ -278,7 +303,7 @@ func menuChoice(item *wardrobe, total *int) {
 	case 2:
 		sortingMenu(*item, *total)
 	case 3:
-		searchClothingItem(*item, *total) // not implemented yet
+		searchClothingItem(*item, *total)
 	case 4:
 		recommendOutfit(item, total) // not implemented yet
 	}
@@ -420,37 +445,43 @@ func sortingMenu(item wardrobe, total int) {
 
 	switch choice {
 	case 1:
-		sortMostFormal(&item, total)
+		sortMostFormal(item, total)
 	case 2:
-		sortLeastFormal(&item, total)
+		sortLeastFormal(item, total)
 	case 3:
-		sortByLastWorn(&item, total)
+		sortByLastWorn(item, total)
 	}
 }
 
-func sortMostFormal(item *wardrobe, total int) {
-	selectionSortDescendingFormal(*item, total)
-	printSorted(*item, total)
+func sortMostFormal(item wardrobe, total int) {
+	var sortedItem wardrobe
+	sortedItem = item
+	selectionSortDescendingFormal(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func sortLeastFormal(item *wardrobe, total int) {
-	selectionSortAscendingFormal(*item, total)
-	printSorted(*item, total)
+func sortLeastFormal(item wardrobe, total int) {
+	var sortedItem wardrobe
+	sortedItem = item
+	selectionSortAscendingFormal(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func sortByLastWorn(item *wardrobe, total int) {
-	insertionSortByLastWorn(*item, total)
-	printSorted(*item, total)
+func sortByLastWorn(item wardrobe, total int) {
+	var sortedItem wardrobe
+	sortedItem = item
+	insertionSortByLastWorn(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func selectionSortDescendingFormal(arr wardrobe) {
+func selectionSortDescendingFormal(arr wardrobe, total int) {
 	var i, j, maxIndex int
 	var temp ClothingItem
 
-	for i = 0; i < len(arr)-1; i++ {
+	for i = 0; i < total-1; i++ {
 		maxIndex = i
 		for j = i + 1; j < len(arr); j++ {
-			if arr[j].Formality > arr[maxIndex].Formality {
+			if arr[j].rFormality > arr[maxIndex].rFormality {
 				maxIndex = j
 			}
 		}
@@ -460,14 +491,14 @@ func selectionSortDescendingFormal(arr wardrobe) {
 	}
 }
 
-func selectionSortAscendingFormal(arr wardrobe) {
+func selectionSortAscendingFormal(arr wardrobe, total int) {
 	var i, j, minIndex int
 	var temp ClothingItem
 
-	for i = 0; i < len(arr)-1; i++ {
+	for i = 0; i < total-1; i++ {
 		minIndex = i
 		for j = i + 1; j < len(arr); j++ {
-			if arr[j].Formality < arr[minIndex].Formality {
+			if arr[j].rFormality < arr[minIndex].rFormality {
 				minIndex = j
 			}
 		}
@@ -477,11 +508,11 @@ func selectionSortAscendingFormal(arr wardrobe) {
 	}
 }
 
-func insertionSortByLastWorn(arr wardrobe) {
+func insertionSortByLastWorn(arr wardrobe, total int) {
 	var i, j int
 	var key ClothingItem
 
-	for i = 1; i < len(arr); i++ {
+	for i = 1; i < total; i++ {
 		key = arr[i]
 		j = i - 1
 		for j >= 0 && arr[j].LastWorn < key.LastWorn {
@@ -492,7 +523,7 @@ func insertionSortByLastWorn(arr wardrobe) {
 	}
 }
 
-func printSorted(arr wardrobe) {
+func printSorted(arr wardrobe, total int) {
 	fmt.Println("========================Sorted Wardrobe========================")
 	fmt.Printf("|| %-10s | %10s | %10s | %10s | %10s | %10s | %10s ||", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
 	fmt.Println("---------------------------------------------------------------")
@@ -552,25 +583,6 @@ func sequentialSearchColor(item wardrobe, total int) {
 	fmt.Println("===================================")
 }
 
-func category(n int) string {
-	var result string
-
-	switch n {
-	case 1:
-		result = "Tops"
-	case 2:
-		result = "Bottoms"
-	case 3:
-		result = "Dress"
-	case 4:
-		result = "Shoes"
-	case 5:
-		result = "Accesories"
-	}
-
-	return result
-}
-
 func binarySearchCategory(item wardrobe, total int) {
 	var choice, left, right, mid int
 	var searchedCategory string
@@ -610,6 +622,45 @@ func binarySearchCategory(item wardrobe, total int) {
 	fmt.Println("===================================")
 }
 
-func recommendOutfit() {
-	fmt.Println("Not implemented yet.")
+func recommendOutfit(item wardrobe, total int) {
+	var i int
+	var preferWeather, preferFormality int
+
+	fmt.Print("Enter weather to dress for (1-Hot, 2-Temperate, 3-Cold): ")
+	fmt.Scan(&preferWeather)
+	for preferWeather < 1 || preferWeather > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter weather to dress for (1-Hot, 2-Temperate, 3-Cold): ")
+		fmt.Scan(&preferWeather)
+	}
+
+	sequentialSearchCategory(item, total, preferWeather, "Tops")
+	sequentialSearchCategory(item, total, preferWeather, "Bottoms")
+	sequentialSearchCategory(item, total, preferWeather, "Dress")
+	sequentialSearchCategory(item, total, preferWeather, "Shoes")
+	sequentialSearchCategory(item, total, preferWeather, "Accesories")
+
+	fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
+	fmt.Scan(&preferFormality)
+	for preferFormality < 1 || preferFormality > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
+		fmt.Scan(&preferFormality)
+	}
+}
+
+func sequentialSearchCategory(item wardrobe, total, preferWeather int, key string) {
+	var i int
+	var result 
+
+	for i = 0; i < total; i++ {
+		for item[i].Category == "Tops" {
+			if preferWeather == item[i].numWeather {
+				resultID = item[i].ID
+				resultName = item[i].Name
+			}
+		}
+	}
+
+
 }
