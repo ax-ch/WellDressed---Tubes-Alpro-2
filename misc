@@ -266,7 +266,7 @@ func viewAllClothingItems(item wardrobe, total int) {
 	fmt.Printf("|| %-3s | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", "ID", "Last Worn", "Name", "Category", "Weather", "Formality Level", "Color")
 	fmt.Println("---------------------------------------------------------------------------------------------------------------------")
 	for i = 0; i < total; i++ {
-		fmt.Printf("|| %-3d | %-15s | %-15s | %-15s | %-15s | %-15d | %-15s ||\n", item[i].ID, item[i].LastWorn, item[i].Name, item[i].Category, item[i].Weather, item[i].Formality, item[i].Color)
+		fmt.Printf("|| %-3d | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", item[i].ID, item[i].LastWorn, item[i].Name, item[i].Category, item[i].Weather, item[i].Formality, item[i].Color)
 	}
 	fmt.Println("=====================================================================================================================")
 }
@@ -305,7 +305,7 @@ func menuChoice(item *wardrobe, total *int) {
 	case 3:
 		searchClothingItem(*item, *total)
 	case 4:
-		recommendOutfit(item, total) // not implemented yet
+		recommendOutfit(*item, *total)
 	}
 }
 
@@ -527,9 +527,8 @@ func printSorted(arr wardrobe, total int) {
 	fmt.Println("========================Sorted Wardrobe========================")
 	fmt.Printf("|| %-10s | %10s | %10s | %10s | %10s | %10s | %10s ||", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
 	fmt.Println("---------------------------------------------------------------")
-	for i := 0; i < len(arr); i++ {
-		fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10d | %-10s | %-10s ||\n",
-			arr[i].ID, arr[i].Name, arr[i].Color, arr[i].Category, arr[i].Formality, arr[i].LastWorn, arr[i].Weather)
+	for i := 0; i < total; i++ {
+		fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s ||\n", arr[i].ID, arr[i].Name, arr[i].Color, arr[i].Category, arr[i].Formality, arr[i].LastWorn, arr[i].Weather)
 	}
 	fmt.Println("===============================================================")
 }
@@ -569,7 +568,7 @@ func sequentialSearchColor(item wardrobe, total int) {
 	fmt.Scan(&searchedColor)
 
 	fmt.Println("===================================")
-	fmt.Println("Result for %s:", searchedColor)
+	fmt.Printf("Result for %s:\n", searchedColor)
 	for i = 0; i < total; i++ {
 		found = item[i].Color == searchedColor
 		if found {
@@ -600,7 +599,7 @@ func binarySearchCategory(item wardrobe, total int) {
 	searchedCategory = category(choice)
 
 	fmt.Println("===================================")
-	fmt.Println("Result for %s:", searchedCategory)
+	fmt.Printf("Result for %s:\n", searchedCategory)
 	left = 0
 	right = total - 1
 	for left <= right {
@@ -623,8 +622,8 @@ func binarySearchCategory(item wardrobe, total int) {
 }
 
 func recommendOutfit(item wardrobe, total int) {
-	var i int
-	var preferWeather, preferFormality int
+	var iTop, iBottom, iDress, iShoes, iAccessories int
+	var preferWeather, preferFormality, preferCombo int
 
 	fmt.Print("Enter weather to dress for (1-Hot, 2-Temperate, 3-Cold): ")
 	fmt.Scan(&preferWeather)
@@ -634,12 +633,6 @@ func recommendOutfit(item wardrobe, total int) {
 		fmt.Scan(&preferWeather)
 	}
 
-	sequentialSearchCategory(item, total, preferWeather, "Tops")
-	sequentialSearchCategory(item, total, preferWeather, "Bottoms")
-	sequentialSearchCategory(item, total, preferWeather, "Dress")
-	sequentialSearchCategory(item, total, preferWeather, "Shoes")
-	sequentialSearchCategory(item, total, preferWeather, "Accesories")
-
 	fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
 	fmt.Scan(&preferFormality)
 	for preferFormality < 1 || preferFormality > 3 {
@@ -647,20 +640,74 @@ func recommendOutfit(item wardrobe, total int) {
 		fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
 		fmt.Scan(&preferFormality)
 	}
-}
 
-func sequentialSearchCategory(item wardrobe, total, preferWeather int, key string) {
-	var i int
-	var result 
+	fmt.Print("Enter 1 for top-bottom combo or 2 for dress outfit recommendation: ")
+	fmt.Scan(&preferCombo)
+	for preferCombo < 1 || preferCombo > 2 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter 1 for top-bottom combo or 2 for dress outfit recommendation: ")
+		fmt.Scan(&preferCombo)
+	}
 
-	for i = 0; i < total; i++ {
-		for item[i].Category == "Tops" {
-			if preferWeather == item[i].numWeather {
-				resultID = item[i].ID
-				resultName = item[i].Name
-			}
+	fmt.Println()
+	fmt.Println("Your recommended outfit combo:")
+
+	if preferCombo == 1 {
+		iTop = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Tops")
+		if iTop < 0 {
+			fmt.Println("Appropriate top not found")
+		} else {
+			fmt.Printf("Top ID: %d, Top Name: %s\n", item[iTop].ID, item[iTop].Name)
+		}
+
+		iBottom = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Bottoms")
+		if iBottom < 0 {
+			fmt.Println("Appropriate bottoms not found")
+		} else {
+			fmt.Printf("Bottom ID: %d, Bottom Name: %s\n", item[iBottom].ID, item[iBottom].Name)
+		}
+
+	} else {
+		iDress = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Dress")
+		if iDress < 0 {
+			fmt.Println("Appropriate dress not found")
+		} else {
+			fmt.Printf("Dress ID: %d, Dress Name: %s\n", item[iDress].ID, item[iDress].Name)
 		}
 	}
 
+	iShoes = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Shoes")
+	if iShoes < 0 {
+		fmt.Println("Appropriate shoes not found")
+	} else {
+		fmt.Printf("Shoes ID: %d, Shoes Name: %s\n", item[iShoes].ID, item[iShoes].Name)
+	}
 
+	iAccessories = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Accesories")
+	if iAccessories < 0 {
+		fmt.Println("Appropriate accessories not found")
+	} else {
+		fmt.Printf("Accessories ID: %d, Accessories Name: %s\n", item[iAccessories].ID, item[iAccessories].Name)
+	}
+}
+
+func sequentialSearchRecommendation(item wardrobe, total, preferWeather, preferFormality int, keyCategory string) int {
+	var i int
+	var found bool
+
+	found = false
+	i = 0
+
+	for i < total && !found {
+		if item[i].numWeather == preferWeather && item[i].rFormality == preferFormality && item[i].Category == keyCategory {
+			found = true
+		}
+		i++
+	}
+
+	if !found {
+		i = -1
+	}
+
+	return i
 }
