@@ -3,26 +3,41 @@ package main
 import "fmt"
 
 type ClothingItem struct {
-	ID        int
-	Name      string
-	Color     string
-	Category  string
-	Formality int
-	LastWorn  string
-	Weather   string
-} 
+	ID    int
+	Name  string
+	Color string
 
-const NMAX int = 77
+	Category    string
+	numCategory int
+
+	Formality  string
+	rFormality int
+
+	Weather    string
+	numWeather int
+
+	LastWorn  string
+	rLastWorn int // not implemented yet (for nr. 2 in what's missing)
+}
+
+const NMAX int = 99
+
 type wardrobe [NMAX]ClothingItem
+
+// What's missing at the moment:
+// 1. Exit option (still infinite loop for features)
+// 2. Rather than string comparison, make it into one time variable for last worn sorting
+// 3. Rank for sorting (so no new arrays)
+// 4. Tidying up; make it as simple as possible! :D
 
 func main() {
 	var item wardrobe
 	var total int
 
 	welcome()
-	readNumberOfClothingItems(&total)
-	addClothingItem(&item, total)
-	viewAllClothingItems(item)
+
+	addClothingItem(&item, &total, 1)
+	viewAllClothingItems(item, total)
 	fmt.Println("Wardrobe setup complete!")
 	fmt.Println("You can now edit, sort, search, and get outfit recommendations.")
 	fmt.Println()
@@ -35,172 +50,231 @@ func main() {
 func welcome() {
 	var userName string
 
-	fmt.Print("Enter your name: ")
+	fmt.Print("Enter your name (one word, e.g. Terry): ")
 	fmt.Scan(&userName)
+
 	fmt.Println("=========================================================================")
-	fmt.Println(" /\\_/\\  Hello %s, welcome to WellDressed!", userName)
+	fmt.Printf(" /\\_/\\   Hello %s, welcome to WellDressed!\n", userName)
 	fmt.Println("( o.o )  This is your digital wardrobe.")
-	fmt.Println(" > ^ <  You can add, modify, remove, and sort your clothing items.")
-	fmt.Println("You can also search for clothing items and get outfit recommendations.")
-	fmt.Println("Let's get started!")
+	fmt.Println(" > ^ <   Let's get started!")
 	fmt.Println("=========================================================================")
 	fmt.Println()
-}
-
-func readNumberOfClothingItems(total *int) {
 	fmt.Println("First, let's set up your wardrobe.")
-	fmt.Print("Enter the number of clothing items in your wardrobe: ")
-	fmt.Scan(&total)
-
-	if *total < 1 {
-		fmt.Println("Invalid number of clothing items. Please enter a positive integer.")
-		readNumberOfClothingItems(total)
-	}
 }
 
-func addClothingItem(item *wardrobe, total int) {
-	var NextID int = 1
+func addClothingItem(item *wardrobe, total *int, NextID int) {
+	var n, i int
+	*total = 0
 
-	for i := 0; i < total; i++ {
-		(*item)[i].ID = NextID
+	fmt.Printf("You can add up to 99 clothing items. You have %d spaces left.\n", NMAX-*total)
+	fmt.Print("Enter the number of clothing items in your wardrobe: ")
+	fmt.Scan(&n)
 
-		fmt.Println("Choose clothing category:")
-		chooseCategory(item, i)
+	for n < 1 || n > NMAX {
+		fmt.Println("Invalid number of clothing items. Please enter a positive integer less than 100.")
+		fmt.Print("Enter the number of clothing items in your wardrobe: ")
+		fmt.Scan(&n)
+	}
 
-		fmt.Print("Enter clothing name: ")
+	*total += n
+
+	fmt.Println()
+	for i = 0; i < n; i++ {
+		item[i].ID = NextID
+		fmt.Printf("Adding clothing item (ID: %d)\n", NextID)
+
 		enterClothingName(item, i)
-
-		fmt.Print("Enter clothing color (one word, e.g., blue, red): ")
+		chooseClothingCategory(item, i)
+		chooseClothingWeather(item, i)
+		chooseClothingFormality(item, i)
 		enterClothingColor(item, i)
-
-		fmt.Println("Choose the suitable weather category")
-		chooseWeather(item, i)
-
-		fmt.Print("Enter clothing formality (1-10): ")
-		enterClothingFormality(item, i)
-
-		fmt.Print("Enter last worn date (YYYY-MM-DD): ")
 		enterClothingLastWorn(item, i)
 
 		NextID++
-	}
-}
-
-func chooseCategory(item *wardrobe, index int) {
-	var categoryChoice int
-
-	fmt.Println("1. Top")
-	fmt.Println("2. Bottoms")
-	fmt.Println("3. Dress")
-	fmt.Println("4. Shoes")
-	fmt.Println("5. Accessories")
-	fmt.Print("Enter your choice (1-5): ")
-
-	fmt.Scan(&categoryChoice)
-	switch categoryChoice {
-	case 1:
-		(*item)[index].Category = "Top"
-	case 2:
-		(*item)[index].Category = "Bottoms"
-	case 3:
-		(*item)[index].Category = "Dress"
-	case 4:
-		(*item)[index].Category = "Shoes"
-	case 5:
-		(*item)[index].Category = "Accessories"
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		chooseCategory(item, index)
+		fmt.Println()
 	}
 }
 
 func enterClothingName(item *wardrobe, index int) {
 	var name string
 
+	fmt.Print("Enter clothing name (one word, e.g. sundress): ")
 	fmt.Scan(&name)
 
-	if len(name) < 1 && name == " " {
+	for len(name) < 1 || name == " " {
 		fmt.Println("Invalid name, please try again.")
-		enterClothingName(item, index)
-	} else {
-		(*item)[index].Name = name
+		fmt.Print("Enter clothing name (one word, e.g. sundress): ")
+		fmt.Scan(&name)
 	}
+
+	(*item)[index].Name = name
+}
+
+func chooseClothingCategory(item *wardrobe, index int) {
+	var categoryChoice int
+
+	fmt.Println("Choose clothing category:")
+	fmt.Println("1. Top")
+	fmt.Println("2. Bottoms")
+	fmt.Println("3. Dress")
+	fmt.Println("4. Shoes")
+	fmt.Println("5. Accessories")
+	fmt.Print("Enter your choice (1-5): ")
+	fmt.Scan(&categoryChoice)
+
+	for categoryChoice < 1 || categoryChoice > 5 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Println("Choose clothing category:")
+		fmt.Println("1. Top")
+		fmt.Println("2. Bottoms")
+		fmt.Println("3. Dress")
+		fmt.Println("4. Shoes")
+		fmt.Println("5. Accessories")
+		fmt.Print("Enter your choice (1-5): ")
+		fmt.Scan(&categoryChoice)
+	}
+
+	(*item)[index].numCategory = categoryChoice
+	(*item)[index].Category = category(categoryChoice)
+}
+
+func category(n int) string {
+	var result string
+
+	switch n {
+	case 1:
+		result = "Tops"
+	case 2:
+		result = "Bottoms"
+	case 3:
+		result = "Dress"
+	case 4:
+		result = "Shoes"
+	case 5:
+		result = "Accesories"
+	}
+
+	return result
+}
+
+func chooseClothingWeather(item *wardrobe, index int) {
+	var weatherChoice int
+
+	fmt.Println("Choose the suitable weather category")
+	fmt.Println("1. Hot")
+	fmt.Println("2. Temperate")
+	fmt.Println("3. Cold")
+	fmt.Print("Enter your choice (1-3): ")
+	fmt.Scan(&weatherChoice)
+
+	for weatherChoice < 1 || weatherChoice > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Println("Choose the suitable weather category")
+		fmt.Println("1. Hot")
+		fmt.Println("2. Temperate")
+		fmt.Println("3. Cold")
+		fmt.Print("Enter your choice (1-3): ")
+		fmt.Scan(&weatherChoice)
+	}
+
+	(*item)[index].numWeather = weatherChoice
+	(*item)[index].Weather = weather(weatherChoice)
+}
+
+func weather(n int) string {
+	var result string
+
+	switch n {
+	case 1:
+		result = "Hot"
+	case 2:
+		result = "Temperate"
+	case 3:
+		result = "Cold"
+	}
+
+	return result
+}
+
+func chooseClothingFormality(item *wardrobe, index int) {
+	var formalityChoice int
+
+	fmt.Println("Choose clothing formality")
+	fmt.Println("1. Casual")
+	fmt.Println("2. Semi-Formal")
+	fmt.Println("3. Formal")
+	fmt.Print("Enter your choice (1-3): ")
+	fmt.Scan(&formalityChoice)
+
+	for formalityChoice < 1 || formalityChoice > 3 {
+		fmt.Println("Invalid formality, please try again.")
+		fmt.Println("Choose clothing formality")
+		fmt.Println("1. Casual")
+		fmt.Println("2. Semi-Formal")
+		fmt.Println("3. Formal")
+		fmt.Print("Enter your choice (1-3): ")
+		fmt.Scan(&formalityChoice)
+	}
+
+	(*item)[index].rFormality = formalityChoice
+	(*item)[index].Formality = formality(formalityChoice)
+}
+
+func formality(n int) string {
+	var result string
+
+	switch n {
+	case 1:
+		result = "Casual"
+	case 2:
+		result = "Semi-Formal"
+	case 3:
+		result = "Formal"
+	}
+
+	return result
 }
 
 func enterClothingColor(item *wardrobe, index int) {
 	var color string
 
+	fmt.Print("Enter clothing color (one word, e.g., cyan): ")
 	fmt.Scan(&color)
 
-	if len(color) < 1 && color == " " {
+	for len(color) < 1 || color == " " {
 		fmt.Println("Invalid color, please try again.")
-		enterClothingColor(item, index)
-	} else {
-		(*item)[index].Color = color
+		fmt.Print("Enter clothing color (one word, e.g., cyan): ")
+		fmt.Scan(&color)
 	}
-}
 
-func chooseWeather(item *wardrobe, index int) {
-	var weatherChoice int
-
-	fmt.Println("1. Hot")
-	fmt.Println("2. Mild/Cool")
-	fmt.Println("3. Cold")
-	fmt.Print("Enter your choice (1-3): ")
-
-	fmt.Scan(&weatherChoice)
-	switch weatherChoice {
-	case 1:
-		(*item)[index].Weather = "Hot"
-	case 2:
-		(*item)[index].Weather = "Mild/Cool"
-	case 3:
-		(*item)[index].Weather = "Cold"
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		chooseWeather(item, index)
-	}
-}
-
-func enterClothingFormality(item *wardrobe, index int) {
-	var formality int
-
-	fmt.Scan(&formality)
-
-	if formality < 1 || formality > 10 {
-		fmt.Println("Invalid formality, please try again.")
-		enterClothingFormality(item, index)
-	} else {
-		(*item)[index].Formality = formality
-	}
+	(*item)[index].Color = color
 }
 
 func enterClothingLastWorn(item *wardrobe, index int) {
 	var lastWorn string
 
+	fmt.Print("Enter last worn date (YYYY-MM-DD): ")
 	fmt.Scan(&lastWorn)
 
-	if len(lastWorn) != 10 {
+	for len(lastWorn) < 10 || lastWorn[4] != '-' || lastWorn[7] != '-' {
 		fmt.Println("Invalid date format, please try again.")
-		enterClothingLastWorn(item, index)
-	} else {
-		(*item)[index].LastWorn = lastWorn
+		fmt.Print("Enter last worn date (YYYY-MM-DD): ")
+		fmt.Scan(&lastWorn)
 	}
+
+	(*item)[index].LastWorn = lastWorn
 }
 
-func viewAllClothingItems(item wardrobe) {
-	fmt.Println("========================View All Clothing Items========================")
-	if len(item) == 0 {
-		fmt.Println("No clothing items found.")
-	} else {
-		fmt.Printf("|| %-10s | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s ||\n", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
-		fmt.Println("----------------------------------------------------------------------")
-		for i := 0; i < len(item); i++ {
-			fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10d | %-10s | %-10s ||\n",
-				item[i].ID, item[i].Name, item[i].Color, item[i].Category, item[i].Formality, item[i].LastWorn, item[i].Weather)
-		}
+func viewAllClothingItems(item wardrobe, total int) {
+	var i int
+
+	fmt.Println("===============================================VIEW ALL CLOTHING ITEMS===============================================")
+	fmt.Printf("|| %-3s | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", "ID", "Last Worn", "Name", "Category", "Weather", "Formality", "Color")
+	fmt.Println("---------------------------------------------------------------------------------------------------------------------")
+	for i = 0; i < total; i++ {
+		fmt.Printf("|| %-3d | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", item[i].ID, item[i].LastWorn, item[i].Name, item[i].Category, item[i].Weather, item[i].Formality, item[i].Color)
 	}
-	fmt.Println("=======================================================================")
+	fmt.Println("=====================================================================================================================")
 }
 
 func menu() {
@@ -212,30 +286,32 @@ func menu() {
 	fmt.Println("║ 2. Sort My Wardrobe                     ║")
 	fmt.Println("║ 3. Search Clothing Item                 ║")
 	fmt.Println("║ 4. Recommend Me an Outfit!              ║")
-	fmt.Println("║ 5. Exit                                 ║")
 	fmt.Println("╚═════════════════════════════════════════╝")
 }
 
-func menuChoice(item *wardrobe, total *int) { // make it a function
+func menuChoice(item *wardrobe, total *int) {
 	var choice int
 
 	menu()
-	fmt.Print("Choose an option (1-5): ")
+	fmt.Print("Choose an option (1-4): ")
 	fmt.Scan(&choice)
+
+	for choice < 1 || choice > 4 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Choose an option (1-4): ")
+		fmt.Scan(&choice)
+	}
+
+	fmt.Println()
 	switch choice {
 	case 1:
 		editWardrobe(item, total)
 	case 2:
-		sortingMenu(*item, total)
+		sortingMenu(*item, *total)
 	case 3:
-		searchClothingItem() // not implemented yet
+		searchClothingItem(*item, *total)
 	case 4:
-		recommendOutfit() // not implemented yet
-	case 5:
-		fmt.Println("Exiting WellDressed ...")
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		menuChoice(item, total)
+		recommendOutfit(*item, *total)
 	}
 }
 
@@ -245,52 +321,52 @@ func editWardrobe(item *wardrobe, total *int) {
 	fmt.Println("Edit My Wardrobe")
 	fmt.Println("1. Modify Clothing Item")
 	fmt.Println("2. Remove Clothing Item")
-	fmt.Println("3. Back to Main Menu")
+	fmt.Println("3. Add Clothing Item")
 	fmt.Print("Choose an option (1-3): ")
-
 	fmt.Scan(&choice)
+
+	for choice < 1 || choice > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Edit My Wardrobe")
+		fmt.Println("1. Modify Clothing Item")
+		fmt.Println("2. Remove Clothing Item")
+		fmt.Println("3. Add Clothing Item")
+		fmt.Print("Choose an option (1-3): ")
+		fmt.Scan(&choice)
+	}
+
 	switch choice {
 	case 1:
 		modifyClothingItem(item, *total)
 	case 2:
 		removeClothingItem(item, total)
 	case 3:
-		menuChoice(item, total)
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		editWardrobe(item, total)
+		addClothingItem(item, total, *total+1)
 	}
 }
 
 func modifyClothingItem(item *wardrobe, total int) {
-	var id int
-	var choice int
+	var i int
+	var id, modifyField, choice int
 
-	viewAllClothingItems(*item)
+	viewAllClothingItems(*item, total)
+
 	fmt.Print("Enter the ID of the clothing item to modify: ")
 	fmt.Scan(&id)
+	fmt.Print("Enter which field to modify (1-Name, 2-Category, 3-Weather, 4-Formality, 5-Color, 6-Last Worn): ")
+	fmt.Scan(&modifyField)
 
-	for i := 0; i < len(*item); i++ {
+	for modifyField < 1 || modifyField > 6 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter which field to modify (1-Last Worn, 2-Name, 3-Category, 4-Weather, 5-Formality, 6-Color): ")
+		fmt.Scan(&modifyField)
+	}
+
+	for i = 0; i < len(*item); i++ {
 		if (*item)[i].ID == id {
-			fmt.Println("Choose new clothing category:")
-			chooseCategory(item, i)
+			modifyByField(item, i, modifyField)
 
-			fmt.Print("Enter new clothing name: ")
-			enterClothingName(item, i)
-
-			fmt.Print("Enter new clothing color (one word, e.g., blue, red): ")
-			enterClothingColor(item, i)
-
-			fmt.Println("Choose the new suitable weather category:")
-			chooseWeather(item, i)
-
-			fmt.Print("Enter new clothing formality (1-10): ")
-			enterClothingFormality(item, i)
-
-			fmt.Print("Enter new last worn date (YYYY-MM-DD): ")
-			enterClothingLastWorn(item, i)
-
-			viewAllClothingItems(*item)
+			viewAllClothingItems(*item, total)
 			fmt.Println("Clothing item modified successfully!")
 			editWardrobe(item, &total)
 		}
@@ -305,23 +381,41 @@ func modifyClothingItem(item *wardrobe, total int) {
 	}
 }
 
+func modifyByField(item *wardrobe, index int, field int) {
+	switch field {
+	case 1:
+		enterClothingName(item, index)
+	case 2:
+		chooseClothingCategory(item, index)
+	case 3:
+		chooseClothingWeather(item, index)
+	case 4:
+		chooseClothingFormality(item, index)
+	case 5:
+		enterClothingColor(item, index)
+	case 6:
+		enterClothingLastWorn(item, index)
+	}
+}
+
 func removeClothingItem(item *wardrobe, total *int) {
-	var id int
+	var i, j, id int
 	var choice int
 
-	viewAllClothingItems(*item)
+	viewAllClothingItems(*item, *total)
 	fmt.Print("Enter the ID of the clothing item to remove: ")
 	fmt.Scan(&id)
 
-	for i := 0; i < *total; i++ {
+	for i = 0; i < *total; i++ {
 		if (*item)[i].ID == id {
-			for j := i; j < *total-1; j++ {
+			for j = i; j < *total-1; j++ {
 				(*item)[j] = (*item)[j+1]
+				(*item)[j].ID--
 			}
 			*total--
 
 			fmt.Println("Clothing item removed successfully!")
-			viewAllClothingItems(*item)
+			viewAllClothingItems(*item, *total)
 			editWardrobe(item, total)
 		}
 	}
@@ -335,62 +429,65 @@ func removeClothingItem(item *wardrobe, total *int) {
 	}
 }
 
-func sortingMenu(item wardrobe, total *int) {
+func sortingMenu(item wardrobe, total int) {
 	var choice int
 
 	fmt.Println("Sort My Wardrobe")
 	fmt.Println("1. Sort from Most Formal to Least Formal")
 	fmt.Println("2. Sort from Least Formal to Most Formal")
 	fmt.Println("3. Sort by Last Worn")
-	fmt.Println("4. Back to Main Menu")
-	fmt.Print("Choose an option (1-4): ")
-
+	fmt.Print("Choose an option (1-3): ")
 	fmt.Scan(&choice)
+
+	for choice < 1 || choice > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Println("Sort My Wardrobe")
+		fmt.Println("1. Sort from Most Formal to Least Formal")
+		fmt.Println("2. Sort from Least Formal to Most Formal")
+		fmt.Println("3. Sort by Last Worn")
+		fmt.Print("Choose an option (1-3): ")
+		fmt.Scan(&choice)
+	}
+
 	switch choice {
 	case 1:
-		sortMostFormal(item)
+		sortMostFormal(item, total)
 	case 2:
-		sortLeastFormal(item)
+		sortLeastFormal(item, total)
 	case 3:
-		sortByLastWorn(item)
-	case 4:
-		menuChoice(&item, total)
-	default:
-		fmt.Println("Invalid choice, please try again.")
-		sortingMenu(item, total)
+		sortByLastWorn(item, total)
 	}
 }
 
-func sortMostFormal(item wardrobe) {
+func sortMostFormal(item wardrobe, total int) {
 	var sortedItem wardrobe
 	sortedItem = item
-	selectionSortDescendingFormal(sortedItem)
-	printSorted(sortedItem)
+	selectionSortDescendingFormal(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func sortLeastFormal(item wardrobe) {
+func sortLeastFormal(item wardrobe, total int) {
 	var sortedItem wardrobe
 	sortedItem = item
-	selectionSortAscendingFormal(sortedItem)
-	printSorted(sortedItem)
+	selectionSortAscendingFormal(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func sortByLastWorn(item wardrobe) {
+func sortByLastWorn(item wardrobe, total int) {
 	var sortedItem wardrobe
 	sortedItem = item
-	insertionSortByLastWorn(sortedItem)
-	printSorted(sortedItem)
+	insertionSortByLastWorn(sortedItem, total)
+	printSorted(sortedItem, total)
 }
 
-func selectionSortDescendingFormal(arr wardrobe) {
-	var i, j int
-	var maxIndex int
+func selectionSortDescendingFormal(arr wardrobe, total int) {
+	var i, j, maxIndex int
 	var temp ClothingItem
 
-	for i = 0; i < len(arr)-1; i++ {
+	for i = 0; i < total-1; i++ {
 		maxIndex = i
 		for j = i + 1; j < len(arr); j++ {
-			if arr[j].Formality > arr[maxIndex].Formality {
+			if arr[j].rFormality > arr[maxIndex].rFormality {
 				maxIndex = j
 			}
 		}
@@ -400,15 +497,14 @@ func selectionSortDescendingFormal(arr wardrobe) {
 	}
 }
 
-func selectionSortAscendingFormal(arr wardrobe) {
-	var i, j int
-	var minIndex int
+func selectionSortAscendingFormal(arr wardrobe, total int) {
+	var i, j, minIndex int
 	var temp ClothingItem
 
-	for i = 0; i < len(arr)-1; i++ {
+	for i = 0; i < total-1; i++ {
 		minIndex = i
 		for j = i + 1; j < len(arr); j++ {
-			if arr[j].Formality < arr[minIndex].Formality {
+			if arr[j].rFormality < arr[minIndex].rFormality {
 				minIndex = j
 			}
 		}
@@ -418,11 +514,11 @@ func selectionSortAscendingFormal(arr wardrobe) {
 	}
 }
 
-func insertionSortByLastWorn(arr wardrobe) {
+func insertionSortByLastWorn(arr wardrobe, total int) {
 	var i, j int
 	var key ClothingItem
 
-	for i = 1; i < len(arr); i++ {
+	for i = 1; i < total; i++ {
 		key = arr[i]
 		j = i - 1
 		for j >= 0 && arr[j].LastWorn < key.LastWorn {
@@ -433,25 +529,191 @@ func insertionSortByLastWorn(arr wardrobe) {
 	}
 }
 
-func printSorted(arr wardrobe) {
+func printSorted(arr wardrobe, total int) {
 	fmt.Println("========================Sorted Wardrobe========================")
 	fmt.Printf("|| %-10s | %10s | %10s | %10s | %10s | %10s | %10s ||", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
 	fmt.Println("---------------------------------------------------------------")
-	for i := 0; i < len(arr); i++ {
-		fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10d | %-10s | %-10s ||\n",
-			arr[i].ID, arr[i].Name, arr[i].Color, arr[i].Category, arr[i].Formality, arr[i].LastWorn, arr[i].Weather)
+	for i := 0; i < total; i++ {
+		fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s ||\n", arr[i].ID, arr[i].Name, arr[i].Color, arr[i].Category, arr[i].Formality, arr[i].LastWorn, arr[i].Weather)
 	}
 	fmt.Println("===============================================================")
 }
 
-func searchClothingItem() {
-	// to be continued
-	fmt.Println("Search functionality is not implemented yet.")
-	menu()
+func searchClothingItem(item wardrobe, total int) {
+	var searchChoice int
+
+	fmt.Println("Choose a search option:")
+	fmt.Println("1. Search by Color")
+	fmt.Println("2. Search by Category")
+	fmt.Println("Choose an option (1-2): ")
+	fmt.Scan(&searchChoice)
+
+	for searchChoice < 1 || searchChoice > 2 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Println("Choose a search option:")
+		fmt.Println("1. Search by Color")
+		fmt.Println("2. Search by Category")
+		fmt.Print("Choose an option (1-2): ")
+		fmt.Scan(&searchChoice)
+	}
+
+	switch searchChoice {
+	case 1:
+		sequentialSearchColor(item, total)
+	case 2:
+		binarySearchCategory(item, total)
+	}
 }
 
-func recommendOutfit() {
-	// to be continued
-	fmt.Println("Recommendation functionality is not implemented yet.")
-	menu()
+func sequentialSearchColor(item wardrobe, total int) {
+	var i int
+	var searchedColor string
+	var found bool = false
+
+	fmt.Println("Enter color to search: ")
+	fmt.Scan(&searchedColor)
+
+	fmt.Println("===================================")
+	fmt.Printf("Result for %s:\n", searchedColor)
+	for i = 0; i < total; i++ {
+		found = item[i].Color == searchedColor
+		if found {
+			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nCategory: %sWeather: %s\nFormality: %s\n",
+				item[i].ID, item[i].LastWorn, item[i].Name, item[i].Category, item[i].Weather, item[i].Formality)
+		}
+	}
+	if !found {
+		fmt.Println("Item not found.")
+	}
+	fmt.Println("===================================")
+}
+
+func binarySearchCategory(item wardrobe, total int) {
+	var choice, left, right, mid int
+	var searchedCategory string
+	var found bool = false
+
+	fmt.Println("Choose category to search (1-Tops, 2-Bottoms, 3-Dress, 4-Shoes, 5-Accesories): ")
+	fmt.Scan(&choice)
+
+	for choice < 1 || choice > 5 {
+		fmt.Println("Invalid category, please try again.")
+		fmt.Println("Choose category to search (1-Tops, 2-Bottoms, 3-Dress, 4-Shoes, 5-Accesories): ")
+		fmt.Scan(&choice)
+	}
+
+	searchedCategory = category(choice)
+
+	fmt.Println("===================================")
+	fmt.Printf("Result for %s:\n", searchedCategory)
+	left = 0
+	right = total - 1
+	for left <= right {
+		mid = (left + right) / 2
+		if item[mid].numCategory < choice {
+			left = mid + 1
+		} else if item[mid].numCategory > choice {
+			right = mid - 1
+		} else {
+			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nColor: %sWeather: %s\nFormality: %s\n",
+				item[mid].ID, item[mid].LastWorn, item[mid].Name, item[mid].Color, item[mid].Weather, item[mid].Formality)
+			found = true
+		}
+	}
+
+	if !found {
+		fmt.Println("Item not found.")
+	}
+	fmt.Println("===================================")
+}
+
+func recommendOutfit(item wardrobe, total int) {
+	var iTop, iBottom, iDress, iShoes, iAccessories int
+	var preferWeather, preferFormality, preferCombo int
+
+	fmt.Print("Enter weather to dress for (1-Hot, 2-Temperate, 3-Cold): ")
+	fmt.Scan(&preferWeather)
+	for preferWeather < 1 || preferWeather > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter weather to dress for (1-Hot, 2-Temperate, 3-Cold): ")
+		fmt.Scan(&preferWeather)
+	}
+
+	fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
+	fmt.Scan(&preferFormality)
+	for preferFormality < 1 || preferFormality > 3 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter occasion formality to dress for (1-Casual, 2-Semi-Formal, 3-Formal): ")
+		fmt.Scan(&preferFormality)
+	}
+
+	fmt.Print("Enter 1 for top-bottom combo or 2 for dress outfit recommendation: ")
+	fmt.Scan(&preferCombo)
+	for preferCombo < 1 || preferCombo > 2 {
+		fmt.Println("Invalid choice, please try again.")
+		fmt.Print("Enter 1 for top-bottom combo or 2 for dress outfit recommendation: ")
+		fmt.Scan(&preferCombo)
+	}
+
+	fmt.Println()
+	fmt.Println("Your recommended outfit combo:")
+
+	if preferCombo == 1 {
+		iTop = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Tops")
+		if iTop < 0 {
+			fmt.Println("Appropriate top not found")
+		} else {
+			fmt.Printf("Top ID: %d, Top Name: %s\n", item[iTop].ID, item[iTop].Name)
+		}
+
+		iBottom = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Bottoms")
+		if iBottom < 0 {
+			fmt.Println("Appropriate bottoms not found")
+		} else {
+			fmt.Printf("Bottom ID: %d, Bottom Name: %s\n", item[iBottom].ID, item[iBottom].Name)
+		}
+
+	} else {
+		iDress = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Dress")
+		if iDress < 0 {
+			fmt.Println("Appropriate dress not found")
+		} else {
+			fmt.Printf("Dress ID: %d, Dress Name: %s\n", item[iDress].ID, item[iDress].Name)
+		}
+	}
+
+	iShoes = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Shoes")
+	if iShoes < 0 {
+		fmt.Println("Appropriate shoes not found")
+	} else {
+		fmt.Printf("Shoes ID: %d, Shoes Name: %s\n", item[iShoes].ID, item[iShoes].Name)
+	}
+
+	iAccessories = sequentialSearchRecommendation(item, total, preferWeather, preferFormality, "Accesories")
+	if iAccessories < 0 {
+		fmt.Println("Appropriate accessories not found")
+	} else {
+		fmt.Printf("Accessories ID: %d, Accessories Name: %s\n", item[iAccessories].ID, item[iAccessories].Name)
+	}
+}
+
+func sequentialSearchRecommendation(item wardrobe, total, preferWeather, preferFormality int, keyCategory string) int {
+	var i int
+	var found bool
+
+	found = false
+	i = 0
+
+	for i < total && !found {
+		if item[i].numWeather == preferWeather && item[i].rFormality == preferFormality && item[i].Category == keyCategory {
+			found = true
+		}
+		i++
+	}
+
+	if !found {
+		i = -1
+	}
+
+	return i
 }
