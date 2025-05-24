@@ -63,15 +63,15 @@ func welcome() {
 }
 
 func addClothingItem(item *wardrobe, total *int, NextID int) {
-	var n, i int
-	*total = 0
+	var n, i, spaceLeft int
 
-	fmt.Printf("You can add up to 99 clothing items. You have %d spaces left.\n", NMAX-*total)
+	spaceLeft = NMAX - *total
+	fmt.Printf("You can add up to 99 clothing items. You have %d spaces left.\n", spaceLeft)
 	fmt.Print("Enter the number of clothing items in your wardrobe: ")
 	fmt.Scan(&n)
 
-	for n < 1 || n > NMAX {
-		fmt.Println("Invalid number of clothing items. Please enter a positive integer less than 100.")
+	for n < 1 || n > spaceLeft {
+		fmt.Printf("Invalid number of clothing items. Please enter a positive integer less than %d.\n", spaceLeft)
 		fmt.Print("Enter the number of clothing items in your wardrobe: ")
 		fmt.Scan(&n)
 	}
@@ -460,24 +460,18 @@ func sortingMenu(item wardrobe, total int) {
 }
 
 func sortMostFormal(item wardrobe, total int) {
-	var sortedItem wardrobe
-	sortedItem = item
-	selectionSortDescendingFormal(sortedItem, total)
-	printSorted(sortedItem, total)
+	selectionSortDescendingFormal(item, total)
+	printSorted(item, total)
 }
 
 func sortLeastFormal(item wardrobe, total int) {
-	var sortedItem wardrobe
-	sortedItem = item
-	selectionSortAscendingFormal(sortedItem, total)
-	printSorted(sortedItem, total)
+	selectionSortAscendingFormal(item, total)
+	printSorted(item, total)
 }
 
 func sortByLastWorn(item wardrobe, total int) {
-	var sortedItem wardrobe
-	sortedItem = item
-	insertionSortByLastWorn(sortedItem, total)
-	printSorted(sortedItem, total)
+	insertionSortByLastWorn(item, total)
+	printSorted(item, total)
 }
 
 func selectionSortDescendingFormal(arr wardrobe, total int) {
@@ -486,7 +480,7 @@ func selectionSortDescendingFormal(arr wardrobe, total int) {
 
 	for i = 0; i < total-1; i++ {
 		maxIndex = i
-		for j = i + 1; j < len(arr); j++ {
+		for j = i + 1; j < total; j++ {
 			if arr[j].rFormality > arr[maxIndex].rFormality {
 				maxIndex = j
 			}
@@ -503,7 +497,7 @@ func selectionSortAscendingFormal(arr wardrobe, total int) {
 
 	for i = 0; i < total-1; i++ {
 		minIndex = i
-		for j = i + 1; j < len(arr); j++ {
+		for j = i + 1; j < total; j++ {
 			if arr[j].rFormality < arr[minIndex].rFormality {
 				minIndex = j
 			}
@@ -530,13 +524,15 @@ func insertionSortByLastWorn(arr wardrobe, total int) {
 }
 
 func printSorted(arr wardrobe, total int) {
-	fmt.Println("========================Sorted Wardrobe========================")
-	fmt.Printf("|| %-10s | %10s | %10s | %10s | %10s | %10s | %10s ||", "ID", "Name", "Color", "Category", "Formality", "Last Worn", "Weather")
-	fmt.Println("---------------------------------------------------------------")
-	for i := 0; i < total; i++ {
-		fmt.Printf("|| %-10d | %-10s | %-10s | %-10s | %-10s | %-10s | %-10s ||\n", arr[i].ID, arr[i].Name, arr[i].Color, arr[i].Category, arr[i].Formality, arr[i].LastWorn, arr[i].Weather)
+	var i int
+
+	fmt.Println("====================================================SORTED  ITEMS====================================================")
+	fmt.Printf("|| %-3s | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", "ID", "Last Worn", "Name", "Category", "Weather", "Formality", "Color")
+	fmt.Println("---------------------------------------------------------------------------------------------------------------------")
+	for i = 0; i < total; i++ {
+		fmt.Printf("|| %-3d | %-15s | %-15s | %-15s | %-15s | %-15s | %-15s ||\n", arr[i].ID, arr[i].LastWorn, arr[i].Name, arr[i].Category, arr[i].Weather, arr[i].Formality, arr[i].Color)
 	}
-	fmt.Println("===============================================================")
+	fmt.Println("=====================================================================================================================")
 }
 
 func searchClothingItem(item wardrobe, total int) {
