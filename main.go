@@ -16,19 +16,12 @@ type ClothingItem struct {
 	Weather    string
 	numWeather int
 
-	LastWorn  string
-	rLastWorn int // not implemented yet (for nr. 2 in what's missing)
+	LastWorn string
 }
 
 const NMAX int = 99
 
 type wardrobe [NMAX]ClothingItem
-
-// What's missing at the moment:
-// 1. Exit option (still infinite loop for features)
-// 2. Rather than string comparison, make it into one time variable for last worn sorting
-// 3. Rank for sorting (so no new arrays)
-// 4. Tidying up; make it as simple as possible! :D
 
 func main() {
 	var item wardrobe
@@ -307,7 +300,7 @@ func menuChoice(item *wardrobe, total *int) {
 	case 1:
 		editWardrobe(item, total)
 	case 2:
-		sortingMenu(*item, *total)
+		sorting(item, *total)
 	case 3:
 		searchClothingItem(*item, *total)
 	case 4:
@@ -347,7 +340,8 @@ func editWardrobe(item *wardrobe, total *int) {
 
 func modifyClothingItem(item *wardrobe, total int) {
 	var i int
-	var id, modifyField, choice int
+	var id, modifyField int
+	var found bool = false
 
 	viewAllClothingItems(*item, total)
 
@@ -362,22 +356,19 @@ func modifyClothingItem(item *wardrobe, total int) {
 		fmt.Scan(&modifyField)
 	}
 
-	for i = 0; i < len(*item); i++ {
+	i = 0
+	for i < total && !found {
 		if (*item)[i].ID == id {
 			modifyByField(item, i, modifyField)
 
 			viewAllClothingItems(*item, total)
 			fmt.Println("Clothing item modified successfully!")
-			editWardrobe(item, &total)
 		}
+		i++
 	}
 
-	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
-	fmt.Scan(&choice)
-	if choice == 1 {
-		modifyClothingItem(item, total)
-	} else {
-		editWardrobe(item, &total)
+	if !found {
+		fmt.Println("Item not found.")
 	}
 }
 
@@ -400,81 +391,48 @@ func modifyByField(item *wardrobe, index int, field int) {
 
 func removeClothingItem(item *wardrobe, total *int) {
 	var i, j, id int
-	var choice int
+	var found bool = false
 
 	viewAllClothingItems(*item, *total)
 	fmt.Print("Enter the ID of the clothing item to remove: ")
 	fmt.Scan(&id)
 
-	for i = 0; i < *total; i++ {
+	i = 0
+	for i < *total && !found {
 		if (*item)[i].ID == id {
+			found = true
 			for j = i; j < *total-1; j++ {
 				(*item)[j] = (*item)[j+1]
 				(*item)[j].ID--
 			}
 			*total--
-
-			fmt.Println("Clothing item removed successfully!")
 			viewAllClothingItems(*item, *total)
-			editWardrobe(item, total)
+			fmt.Println("Clothing item removed successfully!")
 		}
+		i++
 	}
 
-	fmt.Print("Item not found. Choose 1 to try again and 2 to go back: ")
-	fmt.Scan(&choice)
-	if choice == 1 {
-		removeClothingItem(item, total)
-	} else {
-		editWardrobe(item, total)
+	if !found {
+		fmt.Println("Item not found.")
 	}
 }
 
-func sortingMenu(item wardrobe, total int) {
-	var choice int
+func sorting(sortThis *wardrobe, total int) {
 
-	fmt.Println("Sort My Wardrobe")
-	fmt.Println("1. Sort from Most Formal to Least Formal")
-	fmt.Println("2. Sort from Least Formal to Most Formal")
-	fmt.Println("3. Sort by Last Worn")
-	fmt.Print("Choose an option (1-3): ")
-	fmt.Scan(&choice)
+	fmt.Println("Sort by Most Formal: ")
+	selectionSortDescendingFormal(sortThis, total)
+	printSorted(*sortThis, total)
 
-	for choice < 1 || choice > 3 {
-		fmt.Println("Invalid choice, please try again.")
-		fmt.Println("Sort My Wardrobe")
-		fmt.Println("1. Sort from Most Formal to Least Formal")
-		fmt.Println("2. Sort from Least Formal to Most Formal")
-		fmt.Println("3. Sort by Last Worn")
-		fmt.Print("Choose an option (1-3): ")
-		fmt.Scan(&choice)
-	}
+	fmt.Println("Sort by Least Formal: ")
+	selectionSortAscendingFormal(sortThis, total)
+	printSorted(*sortThis, total)
 
-	switch choice {
-	case 1:
-		sortMostFormal(item, total)
-	case 2:
-		sortLeastFormal(item, total)
-	case 3:
-		sortByLastWorn(item, total)
-	}
+	fmt.Println("Sort by Last Worn: ")
+	insertionSortByLastWorn(sortThis, total)
+	printSorted(*sortThis, total)
 }
 
-func sortMostFormal(item wardrobe, total int) {
-	selectionSortDescendingFormal(item, total)
-	printSorted(item, total)
-}
-
-func sortLeastFormal(item wardrobe, total int) {
-	selectionSortAscendingFormal(item, total)
-	printSorted(item, total)
-}
-
-func sortByLastWorn(item wardrobe, total int) {
-	insertionSortByLastWorn(item, total)
-	printSorted(item, total)
-}
-
-func selectionSortDescendingFormal(arr wardrobe, total int) {
+func selectionSortDescendingFormal(arr *wardrobe, total int) {
 	var i, j, maxIndex int
 	var temp ClothingItem
 
@@ -485,13 +443,14 @@ func selectionSortDescendingFormal(arr wardrobe, total int) {
 				maxIndex = j
 			}
 		}
+
 		temp = arr[maxIndex]
 		arr[maxIndex] = arr[i]
 		arr[i] = temp
 	}
 }
 
-func selectionSortAscendingFormal(arr wardrobe, total int) {
+func selectionSortAscendingFormal(arr *wardrobe, total int) {
 	var i, j, minIndex int
 	var temp ClothingItem
 
@@ -502,13 +461,15 @@ func selectionSortAscendingFormal(arr wardrobe, total int) {
 				minIndex = j
 			}
 		}
+
 		temp = arr[minIndex]
 		arr[minIndex] = arr[i]
 		arr[i] = temp
+
 	}
 }
 
-func insertionSortByLastWorn(arr wardrobe, total int) {
+func insertionSortByLastWorn(arr *wardrobe, total int) {
 	var i, j int
 	var key ClothingItem
 
@@ -541,7 +502,7 @@ func searchClothingItem(item wardrobe, total int) {
 	fmt.Println("Choose a search option:")
 	fmt.Println("1. Search by Color")
 	fmt.Println("2. Search by Category")
-	fmt.Println("Choose an option (1-2): ")
+	fmt.Print("Choose an option (1-2): ")
 	fmt.Scan(&searchChoice)
 
 	for searchChoice < 1 || searchChoice > 2 {
