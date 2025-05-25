@@ -26,7 +26,6 @@ func main() {
 	welcome()
 
 	addClothingItem(&item, &total, 1)
-	viewAllClothingItems(item, total)
 	fmt.Println("Wardrobe setup complete!")
 	fmt.Println("You can now edit, sort, search, and get outfit recommendations.")
 	fmt.Println()
@@ -68,7 +67,7 @@ func addClothingItem(item *wardrobe, total *int, NextID int) {
 	*total += n
 
 	fmt.Println()
-	for i = 0; i < n; i++ {
+	for i = 0; i < *total; i++ {
 		item[i].ID = NextID
 		fmt.Printf("Adding clothing item (ID: %d)\n", NextID)
 
@@ -82,6 +81,8 @@ func addClothingItem(item *wardrobe, total *int, NextID int) {
 		NextID++
 		fmt.Println()
 	}
+
+	viewAllClothingItems(*item, *total)
 }
 
 func enterClothingName(item *wardrobe, index int) {
@@ -530,9 +531,9 @@ func sequentialSearchColor(item wardrobe, total int) {
 	fmt.Println("===================================")
 	fmt.Printf("Result for %s:\n", searchedColor)
 	for i = 0; i < total; i++ {
-		found = item[i].Color == searchedColor
-		if found {
-			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nCategory: %sWeather: %s\nFormality: %s\n",
+		if item[i].Color == searchedColor {
+			found = true
+			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nCategory: %s\nWeather: %s\nFormality: %s\n",
 				item[i].ID, item[i].LastWorn, item[i].Name, item[i].Category, item[i].Weather, item[i].Formality)
 		}
 	}
@@ -569,7 +570,7 @@ func binarySearchCategory(item wardrobe, total int) {
 		} else if item[mid].numCategory > choice {
 			right = mid - 1
 		} else {
-			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nColor: %sWeather: %s\nFormality: %s\n",
+			fmt.Printf("ID: %d\nLast Worn: %s\nName: %s\nColor: %s\n Weather: %s\nFormality: %s\n",
 				item[mid].ID, item[mid].LastWorn, item[mid].Name, item[mid].Color, item[mid].Weather, item[mid].Formality)
 			found = true
 		}
@@ -664,14 +665,12 @@ func sequentialSearchRecommendation(item wardrobe, total int, preferWeather, pre
 
 	i = 0
 	for i < total && !found {
-		if item[i].numWeather == preferWeather && item[i].numFormality == preferFormality && item[i].Category == keyCategory {
-			found = true
-		}
+		found = item[i].numWeather == preferWeather && item[i].numFormality == preferFormality && item[i].Category == keyCategory
 		i++
 	}
-	if !found {
-		i = -1
-	}
 
-	return i
+	if !found {
+		i = 0
+	}
+	return i - 1
 }
