@@ -720,15 +720,15 @@ func sequentialSearchRecommendation(item wardrobe, total int, preferWeather, pre
 	var i int
 	var found bool = false
 
-	i = 0
-	for i < total && !found {
+	i = total - 1
+	for i >= 0 && !found {
 		found = item[i].numWeather == preferWeather && item[i].numFormality == preferFormality && item[i].Category == keyCategory
+		i--
+	}
+
+	if found {
 		i++
 	}
 
-	if !found {
-		i = 0
-	}
-
-	return i - 1
+	return i
 }
