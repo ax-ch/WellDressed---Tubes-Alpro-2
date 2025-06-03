@@ -79,37 +79,42 @@ func addClothingItem(item *wardrobe, total *int, NextID int) {
 	var n, i, spaceLeft int
 
 	spaceLeft = NMAX - *total
-	fmt.Printf("You can add up to 99 clothing items. You have %d spaces left.\n", spaceLeft)
-	fmt.Print("Enter the number of clothing items in your wardrobe: ")
-	fmt.Scan(&n)
-
-	// ensures validity
-	for n < 1 || n > spaceLeft {
-		fmt.Printf("Invalid number of clothing items. Please enter a positive integer less than %d.\n", spaceLeft)
+	if spaceLeft > 0 {
+		fmt.Printf("You can add up to 99 clothing items. You have %d spaces left.\n", spaceLeft)
 		fmt.Print("Enter the number of clothing items in your wardrobe: ")
 		fmt.Scan(&n)
-	}
 
-	*total += n
+		// ensures validity
+		for n < 1 || n > spaceLeft {
+			fmt.Printf("Invalid number of clothing items. Please enter a positive integer less than %d.\n", spaceLeft+1)
+			fmt.Print("Enter the number of clothing items in your wardrobe: ")
+			fmt.Scan(&n)
+		}
 
-	fmt.Println()
-	for i = NextID - 1; i < *total; i++ {
-		item[i].ID = NextID
-		fmt.Printf("Adding clothing item (ID: %d)\n", NextID)
+		*total += n
 
-		enterClothingName(item, i)
-		chooseClothingCategory(item, i)
-		chooseClothingWeather(item, i)
-		chooseClothingFormality(item, i)
-		enterClothingColor(item, i)
-		enterClothingLastWorn(item, i)
-
-		NextID++
 		fmt.Println()
+		for i = NextID - 1; i < *total; i++ {
+			item[i].ID = NextID
+			fmt.Printf("Adding clothing item (ID: %d)\n", NextID)
+
+			enterClothingName(item, i)
+			chooseClothingCategory(item, i)
+			chooseClothingWeather(item, i)
+			chooseClothingFormality(item, i)
+			enterClothingColor(item, i)
+			enterClothingLastWorn(item, i)
+
+			NextID++
+			fmt.Println()
+		}
+
+		viewAllClothingItems(*item, *total)
+		fmt.Println("Clothing item added succesfully!")
+	} else {
+		fmt.Println("Cannot add item, data has reached maximum.")
 	}
 
-	viewAllClothingItems(*item, *total)
-	fmt.Println("Clothing item added succesfully!")
 }
 
 func enterClothingName(item *wardrobe, index int) {
@@ -732,3 +737,4 @@ func sequentialSearchRecommendation(item wardrobe, total int, preferWeather, pre
 
 	return i
 }
+
